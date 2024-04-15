@@ -75,6 +75,8 @@ class simulator:
                 print('\nRunning Layer ' + str(layer_id))
 
             single_layer_obj.run()
+            # Coordinate compute
+            single_layer_obj.run_coordinate_compute()
 
             if self.verbose:
                 comp_items = single_layer_obj.get_compute_report_items()

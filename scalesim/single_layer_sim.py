@@ -7,6 +7,7 @@ from scalesim.compute.systolic_compute_os import systolic_compute_os
 from scalesim.compute.systolic_compute_ws import systolic_compute_ws
 from scalesim.compute.systolic_compute_is import systolic_compute_is
 from scalesim.memory.double_buffered_scratchpad_mem import double_buffered_scratchpad as mem_dbsp
+from scalesim.compute.coordinate_compute import coordinate_compute_blk
 
 
 class single_layer_sim:
@@ -18,6 +19,8 @@ class single_layer_sim:
         self.op_mat_obj = opmat()
         self.compute_system = systolic_compute_os()
         self.memory_system = mem_dbsp()
+
+        self.run_coordinate_compute_blk = coordinate_compute_blk()
 
         self.verbose = True
 
@@ -124,6 +127,7 @@ class single_layer_sim:
         # 1.3 Get the no compute demand matrices from for 2 operands and the output
         ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
         ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
+
         #print('DEBUG: Compute operations done')
         # 2. Setup the memory system and run the demands through it to find any memory bottleneck and generate traces
 
@@ -285,3 +289,9 @@ class single_layer_sim:
         items += [self.ofmap_dram_start_cycle, self.ofmap_dram_stop_cycle, self.ofmap_dram_writes]
 
         return items
+
+    def run_coordinate_compute(self):
+        _, ifmap_op_mat = self.op_mat_obj.get_ifmap_matrix()
+        _, filter_op_mat = self.op_mat_obj.get_filter_matrix()
+        output_coordinates = self.run_coordinate_compute_blk.find_output_coordinates(ifmap_op_mat, filter_op_mat)
+        return output_coordinates

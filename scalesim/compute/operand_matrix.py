@@ -38,6 +38,16 @@ class operand_matrix(object):
         self.params_set_flag = False
         self.matrices_ready_flag = False
 
+        # Coordinate computes
+        self.input_values = []
+        self.input_indptr = []
+        self.input_indices = []
+
+        self.filter_values = []
+        self.filter_indptr = []
+        self.filter_indices = []
+
+
     #
     def set_params(self,
                    config_obj,
@@ -252,6 +262,7 @@ class operand_matrix(object):
         return 0, ret_mat
 
     def get_ifmap_matrix(self):
+        self.input_values, self.input_indptr, self.input_indices = self.compress_matrix(self.ifmap_addr_matrix)
         return self.get_ifmap_matrix_part()
 
     # function to get a part or the full filter operand
@@ -288,6 +299,7 @@ class operand_matrix(object):
         return 0, ret_mat
 
     def get_filter_matrix(self):
+        self.filter_values, self.filter_indptr, self.filter_indices = self.compress_matrix(self.filter_addr_matrix)
         return self.get_filter_matrix_part()
 
     # function to get a part or the full ofmap operand
@@ -340,6 +352,20 @@ class operand_matrix(object):
                self.filter_addr_matrix, \
                self.ofmap_addr_matrix
 
+
+    def compress_matrix(self, matrix):
+        data = []
+        indices = []
+        indptr = [0]
+
+        for row in matrix:
+            non_zero_elements = [(index, value) for index, value in enumerate(row) if value != 0]
+            for index, value in non_zero_elements:
+                indices.append(index)
+                data.append(value)
+            indptr.append(len(indices))
+
+        return data, indptr, indices
 
 if __name__ == '__main__':
     opmat = operand_matrix()
