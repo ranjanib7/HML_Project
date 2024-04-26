@@ -22,6 +22,7 @@ class scale_config:
         self.topofile = ""
         self.bandwidths = []
         self.valid_conf_flag = False
+        self.sparsity = 0
 
         self.valid_df_list = ['os', 'ws', 'is']
 
@@ -59,6 +60,7 @@ class scale_config:
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
         self.acc_sz_kb = int(config.get(section, 'AccBuffSizekB'))
+        self.sparsity = float(config.get(section, 'Sparsity'))
 
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
@@ -275,6 +277,9 @@ class scale_config:
             print(message)
         else:
             return min(self.bandwidths)
+    
+    def get_sparsity(self):
+        return self.sparsity
 
     # FIX ISSUE #14
     @staticmethod
