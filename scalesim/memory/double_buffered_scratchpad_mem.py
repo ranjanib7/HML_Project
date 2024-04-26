@@ -167,9 +167,10 @@ class double_buffered_scratchpad:
         pbar_disable = not self.verbose
         for i in tqdm(range(ofmap_lines), disable=pbar_disable):
 
-            cycle_arr = np.zeros((1,1)) + i + self.stall_cycles
+            cycle_arr = np.zeros((1,1)) + i + self.stall_cycles # Cycle number
 
-            ifmap_demand_line = ifmap_demand_mat[i, :].reshape((1,ifmap_demand_mat.shape[1]))
+            # Demand line needs to be changed since it's in CSR. The length of the line will be less since it won't consist of 0s.
+            ifmap_demand_line = ifmap_demand_mat[i, :].reshape((1,ifmap_demand_mat.shape[1]))   # Demand line from ifmap. 1 row
             ifmap_cycle_out = self.ifmap_buf.service_reads(incoming_requests_arr_np=ifmap_demand_line,
                                                             incoming_cycles_arr=cycle_arr)
             ifmap_serviced_cycles += [ifmap_cycle_out[0]]

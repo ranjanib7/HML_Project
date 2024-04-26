@@ -93,6 +93,7 @@ class ReadBufferEstimateBw:
         assert self.params_set_flag, 'Parameters are not set yet'
         assert incoming_cycles_arr.shape[0] == incoming_requests_arr_np.shape[0], 'Incoming cycles and requests dont match'
 
+        # Number of cycles done after operation
         outcycles = incoming_cycles_arr + self.hit_latency  # In estimate mode, operation is stall free.
         # Therefore its always a hit
 
