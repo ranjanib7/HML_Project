@@ -50,7 +50,8 @@ class coordinate_compute_blk:
     
     def valid_convolution_pairs(self, input_coords, weight_coords, weight_dim, input_dim):
         valid_operations = []
-        weight_rows, weight_cols = weight_dim
+        weight_rows  = weight_dim
+        weight_cols = weight_rows
         input_rows, input_cols = input_dim
         
         for input_coord in input_coords:

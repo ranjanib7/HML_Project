@@ -6,6 +6,7 @@ from scalesim.topology_utils import topologies as topoutil
 from scalesim.scale_config import scale_config as cfg
 
 
+
 # This class defines data types for operand matrices
 class operand_matrix(object):
     def __init__(self):
@@ -105,6 +106,8 @@ class operand_matrix(object):
         self.filter_addr_matrix = np.ones((self.conv_window_size, self.num_filters), dtype='>i4')
         self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype='>i4')
         self.params_set_flag = True
+
+        # Modify address matrices to store sparse values only
 
         # TODO: This should be called from top level
         # TODO: Implement get() function for getting the matrix
@@ -259,10 +262,10 @@ class operand_matrix(object):
         end_row = start_row + num_rows
         end_col = start_col + num_cols
         ret_mat = self.ifmap_addr_matrix[start_row: end_row, start_col: end_col]
+        self.input_values, self.input_indptr, self.input_indices = self.compress_matrix(ret_mat)
         return 0, ret_mat
 
     def get_ifmap_matrix(self):
-        self.input_values, self.input_indptr, self.input_indices = self.compress_matrix(self.ifmap_addr_matrix)
         return self.get_ifmap_matrix_part()
 
     # function to get a part or the full filter operand
@@ -296,10 +299,10 @@ class operand_matrix(object):
         # Anand: ISSUE #3. FIX
         #ret_mat = self.filter_addr_matrix[start_row: end_row][start_col: end_col]
         ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
+        self.filter_values, self.filter_indptr, self.filter_indices = self.compress_matrix(ret_mat)
         return 0, ret_mat
 
     def get_filter_matrix(self):
-        self.filter_values, self.filter_indptr, self.filter_indices = self.compress_matrix(self.filter_addr_matrix)
         return self.get_filter_matrix_part()
 
     # function to get a part or the full ofmap operand
