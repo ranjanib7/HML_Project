@@ -33,6 +33,7 @@ class operand_matrix(object):
 
         # Address matrices
         self.ifmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.conv_window_size), dtype=int)
+        self.new_input_operand_matrix = np.ones((self.ifmap_rows*self.ifmap_cols, self.ifmap_rows*self.ifmap_cols), dtype=int)
         self.filter_addr_matrix = np.ones((self.conv_window_size, self.num_filters), dtype=int)
         self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype=int)
 
@@ -199,6 +200,7 @@ class operand_matrix(object):
 
         row_indices = np.expand_dims(np.arange(self.ofmap_px_per_filt), axis=1)
         col_indices = np.arange(self.num_filters)
+        self.ofmap_intermediate_op_matrix = np.zeros_like(self.new_input_operand_matrix, dtype='>i4')
         self.ofmap_addr_matrix = self.calc_ofmap_elem_addr(row_indices, col_indices)
 
         return 0
@@ -267,15 +269,15 @@ class operand_matrix(object):
 
         # Convert to CSR
         ret_mat_flattened = np.unique(ret_mat.flatten())
-        new_operand_matrix = []
+        self.new_input_operand_matrix = []
         # Perform cyclic rotations and append to the next row
         for i in range(len(ret_mat_flattened)):
             rotated_matrix = np.roll(ret_mat_flattened, -i)
-            new_operand_matrix.append(rotated_matrix)
-        new_operand_matrix = np.array(new_operand_matrix)
+            self.new_input_operand_matrix.append(rotated_matrix)
+        self.new_input_operand_matrix = np.array(self.new_input_operand_matrix)
         #Compress it somehow
         #self.ifmap_operand_data, self.ifmap_operand_indptr, self.ifmap_operand_indices = self.compress_matrix(new_operand_matrix)
-        return 0, new_operand_matrix
+        return 0, self.new_input_operand_matrix
 
     def get_ifmap_matrix(self):
         return self.get_ifmap_matrix_part()
@@ -353,8 +355,11 @@ class operand_matrix(object):
         # Anand: ISSUE #7. Patch
         #ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
         ret_mat = self.ofmap_addr_matrix[start_row: end_row, start_col: end_col]
+        if (ret_mat.shape[0] < (self.ifmap_cols * self.ifmap_rows)):
+            output_rows, output_cols = ret_mat.shape
+            ret_mat = np.pad(ret_mat, ((0, (self.ifmap_cols * self.ifmap_rows) - output_rows), (0, 0)), mode='constant', constant_values=-1)
 
-        return 0, ret_mat
+        return 0, ret_mat, self.ofmap_intermediate_op_matrix
 
     def get_ofmap_matrix(self):
         return self.get_ofmap_matrix_part()

@@ -113,7 +113,7 @@ class single_layer_sim:
         # 1.1 Get the operand matrices
         _, ifmap_op_mat = self.op_mat_obj.get_ifmap_matrix()
         _, filter_op_mat = self.op_mat_obj.get_filter_matrix()
-        _, ofmap_op_mat = self.op_mat_obj.get_ofmap_matrix()
+        _, ofmap_op_mat, ofmap_op_inter_mat = self.op_mat_obj.get_ofmap_matrix()
 
         self.num_compute = self.topo.get_layer_num_ofmap_px(self.layer_id) \
                            * self.topo.get_layer_window_size(self.layer_id)

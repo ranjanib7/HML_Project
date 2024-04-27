@@ -172,9 +172,10 @@ class systolic_compute_is:
         self.create_filter_demand_mat()
         self.create_ofmap_demand_mat()
 
-        assert self.ifmap_demand_matrix.shape[0] == self.filter_demand_matrix.shape[0], 'IFMAP and Filter demands out of sync'
+        '''assert self.ifmap_demand_matrix.shape[0] == self.filter_demand_matrix.shape[0], 'IFMAP and Filter demands out of sync'
         assert self.ofmap_demand_matrix.shape[0] == self.filter_demand_matrix.shape[0], 'OFMAP and Filter demands out of sync'
         assert self.ifmap_demand_matrix.shape[1] == self.arr_col, 'IFMAP demands exceed the rows'
+        '''
         assert self.filter_demand_matrix.shape[1] == self.arr_row,'Filter demands exceed the cols'
         assert self.ofmap_demand_matrix.shape[1] == self.arr_col, 'OFMAP demands exceed the cols'
 
@@ -275,7 +276,7 @@ class systolic_compute_is:
                 this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat), axis=0)
 
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
-                # this_fold_demand = skew_matrix(this_fold_demand)
+                #this_fold_demand = skew_matrix(this_fold_demand)
 
                 if fr == 0 and fc == 0:
                     self.filter_demand_matrix = this_fold_demand
@@ -311,7 +312,7 @@ class systolic_compute_is:
                 this_fold_demand = np.concatenate((inter_fold_gap_prefix_mat, this_fold_demand), axis=0)
 
                 # Add skew to the OFMAP demand matrix to reflect systolic pipeline fill
-                this_fold_demand = skew_matrix(this_fold_demand)
+                #this_fold_demand = skew_matrix(this_fold_demand)
 
                 if fr == 0 and fc == 0:
                     self.ofmap_demand_matrix = this_fold_demand

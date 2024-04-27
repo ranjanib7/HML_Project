@@ -59,7 +59,6 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
-        self.acc_sz_kb = int(config.get(section, 'AccBuffSizekB'))
         self.sparsity = float(config.get(section, 'Sparsity'))
 
         # Anand: ISSUE #2. Patch
@@ -126,8 +125,6 @@ class scale_config:
         config.set(section, 'ifmapsramszkB', str(self.ifmap_sz_kb))
         config.set(section, 'filtersramszkB', str(self.filter_sz_kb))
         config.set(section, 'ofmapsramszkB', str(self.ofmap_sz_kb))
-
-        config.set(section, 'AccBuffSizekB', str(self.acc_sz_kb))
 
         config.set(section, 'IfmapOffset', str(self.ifmap_offset))
         config.set(section, 'FilterOffset', str(self.filter_offset))
