@@ -4,6 +4,7 @@ from tqdm import tqdm
 
 from scalesim.topology_utils import topologies as topoutil
 from scalesim.scale_config import scale_config as cfg
+from scipy.sparse import csr_matrix
 
 
 
@@ -40,13 +41,13 @@ class operand_matrix(object):
         self.matrices_ready_flag = False
 
         # Coordinate computes
-        self.input_values = []
-        self.input_indptr = []
-        self.input_indices = []
+        self.ifmap_operand_data = []
+        self.ifmap_operand_indices  = []
+        self.ifmap_operand_indptr = []
 
-        self.filter_values = []
-        self.filter_indptr = []
-        self.filter_indices = []
+        self.filter_operand_data = []
+        self.filter_operand_indices  = []
+        self.filter_operand_indptr = []
 
 
     #
@@ -158,6 +159,7 @@ class operand_matrix(object):
 
         # Call calc_ifmap_elem_addr_numpy with 2D index arrays
         self.ifmap_addr_matrix = self.calc_ifmap_elem_addr(i, j)
+
         return 0
 
     # logic to translate ifmap into matrix fed into systolic array MACs
@@ -262,8 +264,18 @@ class operand_matrix(object):
         end_row = start_row + num_rows
         end_col = start_col + num_cols
         ret_mat = self.ifmap_addr_matrix[start_row: end_row, start_col: end_col]
-        self.input_values, self.input_indptr, self.input_indices = self.compress_matrix(ret_mat)
-        return 0, ret_mat
+
+        # Convert to CSR
+        ret_mat_flattened = np.unique(ret_mat.flatten())
+        new_operand_matrix = []
+        # Perform cyclic rotations and append to the next row
+        for i in range(len(ret_mat_flattened)):
+            rotated_matrix = np.roll(ret_mat_flattened, -i)
+            new_operand_matrix.append(rotated_matrix)
+        new_operand_matrix = np.array(new_operand_matrix)
+        #Compress it somehow
+        #self.ifmap_operand_data, self.ifmap_operand_indptr, self.ifmap_operand_indices = self.compress_matrix(new_operand_matrix)
+        return 0, new_operand_matrix
 
     def get_ifmap_matrix(self):
         return self.get_ifmap_matrix_part()
@@ -271,7 +283,6 @@ class operand_matrix(object):
     # function to get a part or the full filter operand
     def get_filter_matrix_part(self, start_row=0, num_rows=-1, start_col=0,
                                num_cols=-1):
-
         if num_rows == -1:
             num_rows = self.conv_window_size
         if num_cols == -1:
@@ -299,7 +310,11 @@ class operand_matrix(object):
         # Anand: ISSUE #3. FIX
         #ret_mat = self.filter_addr_matrix[start_row: end_row][start_col: end_col]
         ret_mat = self.filter_addr_matrix[start_row: end_row, start_col: end_col]
-        self.filter_values, self.filter_indptr, self.filter_indices = self.compress_matrix(ret_mat)
+        if (ret_mat.shape[0] < (self.ifmap_cols * self.ifmap_rows)):
+            filter_rows, filter_cols = ret_mat.shape
+            ret_mat = np.pad(ret_mat, ((0, (self.ifmap_cols * self.ifmap_rows) - filter_rows), (0, 0)), mode='constant', constant_values=-1)
+        #Compress it somehow
+        #self.filter_operand_data, self.filter_operand_indptr, self.filter_operand_indices = self.compress_matrix(ret_mat)
         return 0, ret_mat
 
     def get_filter_matrix(self):

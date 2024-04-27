@@ -269,7 +269,7 @@ class systolic_compute_is:
                 this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat), axis=0)
 
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
-                this_fold_demand = skew_matrix(this_fold_demand)
+                #this_fold_demand = skew_matrix(this_fold_demand)
 
                 if fr == 0 and fc == 0:
                     self.filter_demand_matrix = this_fold_demand
