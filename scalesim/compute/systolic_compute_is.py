@@ -9,6 +9,7 @@ class systolic_compute_is:
         # Params set by user
         self.config = cfg()
 
+        # Initialize ifmap, ofmap, filter operand matrices. They consist of the tensor values
         self.ifmap_op_mat = np.zeros((1, 1))
         self.ofmap_op_mat = np.zeros((1, 1))
         self.filter_op_mat = np.zeros((1, 1))
@@ -18,6 +19,7 @@ class systolic_compute_is:
         self.Sc = 0
         self.T = 0
 
+        # Systolic array params
         self.arr_row = 0
         self.arr_col = 0
 
@@ -29,6 +31,7 @@ class systolic_compute_is:
         self.ifmap_prefetch_matrix = np.zeros((1,1))
         self.filter_prefetch_matrix = np.zeros((1,1))
 
+        # Demand matrices. -1 means no demand.
         self.ifmap_demand_matrix = np.zeros((1,1))
         self.ofmap_demand_matrix = np.zeros((1,1))
         self.filter_demand_matrix = np.zeros((1,1))
@@ -179,11 +182,13 @@ class systolic_compute_is:
 
     #
     def create_ifmap_demand_mat(self):
+        # Need to change the demand matrix to be in CSR format.
         assert self.params_set_flag, 'Parameters are not set'
 
         inter_fold_gap_suffix = self.arr_row + self.arr_col + self.T - 2
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_col)) * -1
 
+        # Need to change col_fold, row_fold.
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 row_start_id = fr * self.arr_row
@@ -237,6 +242,7 @@ class systolic_compute_is:
 
     #
     def create_filter_demand_mat(self):
+        # Change the demand amtrix to be in CSR format.
         assert self.params_set_flag, 'Parameters are not set'
 
         inter_fold_gap_prefix = self.arr_row
@@ -269,7 +275,7 @@ class systolic_compute_is:
                 this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat), axis=0)
 
                 # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
-                #this_fold_demand = skew_matrix(this_fold_demand)
+                # this_fold_demand = skew_matrix(this_fold_demand)
 
                 if fr == 0 and fc == 0:
                     self.filter_demand_matrix = this_fold_demand
