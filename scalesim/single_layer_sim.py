@@ -111,9 +111,9 @@ class single_layer_sim:
         # 1. Setup and the get the demand from compute system
 
         # 1.1 Get the operand matrices
-        _, ifmap_op_mat = self.op_mat_obj.get_ifmap_matrix()
+        _, ifmap_op_mat, ifmap_op_old_mat = self.op_mat_obj.get_ifmap_matrix()
         _, filter_op_mat = self.op_mat_obj.get_filter_matrix()
-        _, ofmap_op_mat, ofmap_op_inter_mat = self.op_mat_obj.get_ofmap_matrix()
+        _, ofmap_op_mat, ofmap_inter_mat = self.op_mat_obj.get_ofmap_matrix()
 
         self.num_compute = self.topo.get_layer_num_ofmap_px(self.layer_id) \
                            * self.topo.get_layer_window_size(self.layer_id)
@@ -121,12 +121,13 @@ class single_layer_sim:
         # 1.2 Get the prefetch matrices for both operands
         self.compute_system.set_params(config_obj=self.config,
                                        ifmap_op_mat=ifmap_op_mat,
+                                       ifmap_op_old_mat = ifmap_op_old_mat,
                                        filter_op_mat=filter_op_mat,
                                        ofmap_op_mat=ofmap_op_mat)
 
         # 1.3 Get the no compute demand matrices from for 2 operands and the output
-        ifmap_prefetch_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
-        ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat = self.compute_system.get_demand_matrices()
+        ifmap_prefetch_mat, ifmap_prefetch_old_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
+        ifmap_demand_mat, ifmap_demand_old_mat, filter_demand_mat, filter_demand_old_mat, ofmap_demand_mat, ofmap_demand_old_mat = self.compute_system.get_demand_matrices()
 
         #print('DEBUG: Compute operations done')
         # 2. Setup the memory system and run the demands through it to find any memory bottleneck and generate traces
@@ -176,12 +177,12 @@ class single_layer_sim:
 
         # 2.2 Install the prefetch matrices to the read buffers to finish setup
         if self.config.use_user_dram_bandwidth() :
-            self.memory_system.set_read_buf_prefetch_matrices(ifmap_prefetch_mat=ifmap_prefetch_mat,
+            self.memory_system.set_read_buf_prefetch_matrices(ifmap_prefetch_mat=ifmap_prefetch_old_mat,
                                                               filter_prefetch_mat=filter_prefetch_mat)
 
         # 2.3 Start sending the requests through the memory system until
         # all the OFMAP memory requests have been serviced
-        self.memory_system.service_memory_requests(ifmap_demand_mat, filter_demand_mat, ofmap_demand_mat)
+        self.memory_system.service_memory_requests(ifmap_demand_old_mat, filter_demand_old_mat, ofmap_demand_old_mat)
 
         self.runs_ready = True
 
