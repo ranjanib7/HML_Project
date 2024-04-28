@@ -1,6 +1,7 @@
 absl-py
 tqdm
 configparser
+scipy
 numpy
 pandas
 cython
