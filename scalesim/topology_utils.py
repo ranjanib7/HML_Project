@@ -169,6 +169,7 @@ class topologies(object):
         entry[1] = math.floor(entry[1] * (1 - self.config.get_sparsity()))
         # entry[2] = math.floor(entry[2] * self.config.get_sparsity())
         entry[3] = math.floor(entry[3] * (1 - self.config.get_sparsity()))
+        # entry[4] = math.floor(entry[4] * self.config.get_sparsity())
 
         self.topo_arrays.append(entry)
 
@@ -204,16 +205,17 @@ class topologies(object):
             self.load_arrays(topofilename)
         self.layers_calculated_hyperparams = []
         for array in self.topo_arrays:
-            ifmap_h = array[1]
-            ifmap_w = array[2]
-            filt_h = array[3]
-            filt_w = array[4]
+            ifmap_h = array[1]      # ifmap height
+            ifmap_w = array[2]      # ifmap width
+            filt_h = array[3]       # filter height
+            filt_w = array[4]       # filter width
             num_ch   = array[5]
             num_filt = array[6]
             stride_h = array[7]
             stride_w = array[8]
             ofmap_h = int(math.ceil((ifmap_h - filt_h + stride_h) / stride_h))
             ofmap_w = int(math.ceil((ifmap_w - filt_w + stride_w) / stride_w))
+            # print(f"ifmap_h: {ifmap_h}, ifmap_w: {ifmap_w}, filt_h: {filt_h}, filt_w: {filt_w}")
             num_mac = ofmap_h * ofmap_w * filt_h * filt_w * num_ch * num_filt
             window_size = filt_h * filt_w * num_ch
             entry = [ofmap_h, ofmap_w, num_mac, window_size]
