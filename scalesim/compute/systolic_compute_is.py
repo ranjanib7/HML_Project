@@ -74,9 +74,10 @@ class systolic_compute_is:
         self.T = self.filter_op_mat.shape[1]
 
         self.arr_row, self.arr_col = self.config.get_array_dims()
-
+        
         self.row_fold = math.ceil(self.Sr / self.arr_row)
         self.col_fold = math.ceil(self.Sc / self.arr_col)
+        # print(f"Sr: {self.Sr}, Sc: {self.Sc}, T: {self.T}, row_fold: {self.row_fold}, col_fold: {self.col_fold}")
 
         self.params_set_flag = True
 
@@ -190,8 +191,12 @@ class systolic_compute_is:
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_col)) * -1
 
         # Need to change col_fold, row_fold.
+        print(f"In create ifmap demand matrix")
+        # count = 0
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
+                # count += 1
+                # print(f"Count: {count}")
                 row_start_id = fr * self.arr_row
                 row_end_idx = min(row_start_id + self.arr_row, self.Sr)
                 row_delta = self.arr_row - (row_end_idx - row_start_id)
@@ -237,6 +242,7 @@ class systolic_compute_is:
                 if fr == 0 and fc == 0:
                     self.ifmap_demand_matrix = this_fold_demand
                 else:
+                    # print(f"ifmap_demand_matrix_shape: {self.ifmap_demand_matrix.shape}, this_fold_demand: {this_fold_demand}")
                     self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
 
         # Skew is not needed in IFMAP for IS
@@ -252,6 +258,7 @@ class systolic_compute_is:
         inter_fold_gap_suffix = self.arr_col - 1
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_row)) * -1
 
+        print("In filter demand matrix")
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 row_start_id = fr * self.arr_row
@@ -291,6 +298,7 @@ class systolic_compute_is:
         inter_fold_gap_prefix = 2 * self.arr_row - 1
         inter_fold_gap_prefix_mat = np.ones((inter_fold_gap_prefix, self.arr_col)) * -1
 
+        print("In create ofmap demand matrix")
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 col_start_id = fc * self.arr_col

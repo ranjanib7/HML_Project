@@ -36,6 +36,7 @@ class operand_matrix(object):
         self.new_input_operand_matrix = np.ones((self.ifmap_rows*self.ifmap_cols, self.ifmap_rows*self.ifmap_cols), dtype=int)
         self.filter_addr_matrix = np.ones((self.conv_window_size, self.num_filters), dtype=int)
         self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype=int)
+        # print(f"ifmap_addr_matrix: {self.ifmap_addr_matrix.shape}, new_input_operand_matrix: {self.new_input_operand_matrix.shape}")
 
         # Flags
         self.params_set_flag = False

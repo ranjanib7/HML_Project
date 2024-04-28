@@ -198,6 +198,8 @@ class double_buffered_scratchpad:
 
         self.ofmap_buf.empty_all_buffers(ofmap_serviced_cycles[-1])
 
+        # print(f"ifmap_serviced_cycles: {np.asarray(ifmap_serviced_cycles).shape}, ifmap_demand_mat: {ifmap_demand_mat.shape}")
+
         # Prepare the traces
         ifmap_services_cycles_np = np.asarray(ifmap_serviced_cycles).reshape((len(ifmap_serviced_cycles), 1))
         self.ifmap_trace_matrix = np.concatenate((ifmap_services_cycles_np, ifmap_demand_mat), axis=1)

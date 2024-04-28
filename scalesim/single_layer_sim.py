@@ -20,7 +20,7 @@ class single_layer_sim:
         self.compute_system = systolic_compute_os()
         self.memory_system = mem_dbsp()
 
-        self.run_coordinate_compute_blk = coordinate_compute_blk()
+        # self.run_coordinate_compute_blk = coordinate_compute_blk()
 
         self.verbose = True
 
@@ -114,6 +114,7 @@ class single_layer_sim:
         _, ifmap_op_mat = self.op_mat_obj.get_ifmap_matrix()
         _, filter_op_mat = self.op_mat_obj.get_filter_matrix()
         _, ofmap_op_mat, ofmap_op_inter_mat = self.op_mat_obj.get_ofmap_matrix()
+        # print(f"ifmap_op_mat: {ifmap_op_mat.shape}")
 
         self.num_compute = self.topo.get_layer_num_ofmap_px(self.layer_id) \
                            * self.topo.get_layer_window_size(self.layer_id)
@@ -290,12 +291,12 @@ class single_layer_sim:
 
         return items
 
-    def run_coordinate_compute(self):
-        _, ifmap_op_mat = self.op_mat_obj.get_ifmap_matrix()
-        _, filter_op_mat = self.op_mat_obj.get_filter_matrix()
-        #output_coordinates = self.run_coordinate_compute_blk.find_output_coordinates(ifmap_op_mat, filter_op_mat)
-        input_coord = self.run_coordinate_compute_blk.csr_to_dense_coordinates(self.op_mat_obj.input_indptr, self.op_mat_obj.input_indices)
-        filter_coord = self.run_coordinate_compute_blk.csr_to_dense_coordinates(self.op_mat_obj.filter_indptr, self.op_mat_obj.filter_indices)
-        valid_pairs = self.run_coordinate_compute_blk.valid_convolution_pairs(input_coord, filter_coord, (filter_op_mat.shape[0], filter_op_mat.shape[1]), (ifmap_op_mat.shape[0], ifmap_op_mat.shape[1]))
-        output_coordinates = self.run_coordinate_compute_blk.find_convolution_output_coordinates(valid_pairs)
-        return output_coordinates
+    # def run_coordinate_compute(self):
+    #     _, ifmap_op_mat = self.op_mat_obj.get_ifmap_matrix()
+    #     _, filter_op_mat = self.op_mat_obj.get_filter_matrix()
+    #     #output_coordinates = self.run_coordinate_compute_blk.find_output_coordinates(ifmap_op_mat, filter_op_mat)
+    #     input_coord = self.run_coordinate_compute_blk.csr_to_dense_coordinates(self.op_mat_obj.input_indptr, self.op_mat_obj.input_indices)
+    #     filter_coord = self.run_coordinate_compute_blk.csr_to_dense_coordinates(self.op_mat_obj.filter_indptr, self.op_mat_obj.filter_indices)
+    #     valid_pairs = self.run_coordinate_compute_blk.valid_convolution_pairs(input_coord, filter_coord, (filter_op_mat.shape[0], filter_op_mat.shape[1]), (ifmap_op_mat.shape[0], ifmap_op_mat.shape[1]))
+    #     output_coordinates = self.run_coordinate_compute_blk.find_convolution_output_coordinates(valid_pairs)
+    #     return output_coordinates
