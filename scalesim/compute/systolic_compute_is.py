@@ -206,6 +206,7 @@ class systolic_compute_is:
         self.create_ifmap_demand_mat()
         self.create_filter_demand_mat()
         self.create_ofmap_demand_mat()
+        self.calculate_scnn_compute_cycles()
 
         # This is commented out because our input matrix dimensions have changed. 
         # We are cyclically placing the flattened inputs in the arrays so the demand matrix will be longer.
@@ -225,67 +226,6 @@ class systolic_compute_is:
 
         inter_fold_gap_suffix = self.arr_row + self.arr_col + self.T - 2
         inter_fold_gap_suffix_mat = np.ones((inter_fold_gap_suffix, self.arr_col)) * -1
-
-        # Need to change col_fold, row_fold.
-        print(f"In create ifmap demand matrix")
-        # count = 0
-        compute_cycles_this_fold = 0
-        for fc in range(self.col_fold):
-            for fr in range(self.row_fold):
-                # count += 1
-                # print(f"Count: {count}")
-                row_start_id = fr * self.arr_row
-                row_end_idx = min(row_start_id + self.arr_row, self.Sr)
-                row_delta = self.arr_row - (row_end_idx - row_start_id)
-
-                col_start_id = fc * self.arr_col
-                col_end_idx = min(col_start_id + self.arr_col, self.Sc)
-                col_delta = self.arr_col - (col_end_idx - col_start_id)
-
-                # Indexing the cols with row start and row end idx are correct
-                # See the comment on ifmap_prefetch generation
-                this_fold_demand = self.ifmap_op_mat_trans[row_start_id:row_end_idx, col_start_id: col_end_idx]
-                self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
-
-                # Take into account under utilization
-                if col_delta > 0:
-                    null_req_mat = np.ones((this_fold_demand.shape[0], col_delta)) * -1
-                    this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=1)
-
-                if row_delta > 0:
-                    null_req_mat = np.ones((row_delta, self.arr_col)) * -1
-                    this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=0)
-
-                # The IFMAP elems are needed to be filled in reverse order to ensure that
-                # top element is pushed in last to maintain alignment with the input elements
-                this_fold_demand = np.flip(this_fold_demand, 0)
-
-                # Account for the cycles for partial sum generation and accumulation
-                #this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat), axis=0)
-
-                # Calculate the mapping efficiency
-                row_used = min(self.arr_row, row_end_idx - row_start_id)
-                col_used = min(self.arr_col, col_end_idx - col_start_id)
-                #mac_used = row_used * col_used
-                mac_used = row_used
-                mapping_eff_this_fold = (row_used * col_used) / (self.arr_row * self.arr_col)
-
-                #cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
-                #cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
-                compute_cycles_this_fold = mac_used * self.T
-                accumulator_cycles_this_fold = math.floor(compute_cycles_this_fold*0.1)-1
-                #compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col * cycles_this_fold)
-                compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col)
-
-                self.mapping_efficiency_per_fold.append(mapping_eff_this_fold)
-                self.compute_utility_per_fold.append(compute_util_this_fold)
-                self.total_compute_cycles_scnn += (compute_cycles_this_fold + accumulator_cycles_this_fold)
-
-                if fr == 0 and fc == 0:
-                    self.ifmap_demand_matrix = this_fold_demand
-                else:
-                    # print(f"ifmap_demand_matrix_shape: {self.ifmap_demand_matrix.shape}, this_fold_demand: {this_fold_demand}")
-                    self.ifmap_demand_matrix = np.concatenate((self.ifmap_demand_matrix, this_fold_demand), axis=0)
 
         for fc in range(self.col_fold_original):
             for fr in range(self.row_fold_original):
@@ -382,37 +322,45 @@ class systolic_compute_is:
                 else:
                     self.filter_demand_old_matrix = np.concatenate((self.filter_demand_old_matrix, this_fold_demand), axis=0)
 
-        for fc in range(self.col_fold_original):
-            for fr in range(self.row_fold_original):
-                row_start_id = fr * self.arr_row
-                row_end_idx = min(row_start_id + self.arr_row, self.original_Sr)
-                delta = self.arr_row - (row_end_idx - row_start_id)
-
-                # Indexing the cols with row start and row end idx are correct
-                # See the comment on ifmap_prefetch generation
-                this_fold_demand = self.filter_op_mat[row_start_id: row_end_idx, :]
-                this_fold_demand = np.transpose(this_fold_demand)
-                self.filter_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
-
-                # Take into account under utilization
-                if delta > 0:
-                    null_req_mat = np.ones((self.T, delta)) * -1
-                    this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=1)
-
-                # Account for the cycles for weights to load
-                this_fold_demand = np.concatenate((inter_fold_gap_prefix_mat, this_fold_demand), axis=0)
-
-                # Account for the cycles for final output to drain out
-                this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat), axis=0)
-
-                # Add skew to the IFMAP demand matrix to reflect systolic pipeline fill
-                #this_fold_demand = skew_matrix(this_fold_demand)
-
-                if fr == 0 and fc == 0:
-                    self.filter_demand_matrix = this_fold_demand
-                else:
-                    self.filter_demand_matrix = np.concatenate((self.filter_demand_matrix, this_fold_demand), axis=0)
     # END of filter demand generation
+
+    def calculate_scnn_compute_cycles(self):
+
+        for fci in range(self.col_fold):
+            for fri in range(self.row_fold):
+                compute_cycles_this_fold = 0
+                accumulator_cycles_this_fold = 0
+                row_start_id = fri * self.arr_row
+                row_end_idx = min(row_start_id + self.arr_row, self.Sr)
+
+                col_start_id = fci * self.arr_col
+                col_end_idx = min(col_start_id + self.arr_col, self.Sc)
+
+                row_used = min(self.arr_row, row_end_idx - row_start_id)
+                col_used = min(self.arr_col, col_end_idx - col_start_id)
+                
+                mac_used = row_used
+
+                num_filter_rows_per_tile = []
+                for fcf in range(self.col_fold_original):
+                    for frf in range(self.row_fold_original):
+                        row_start_id = frf * self.arr_row
+                        row_end_idx = min(row_start_id + self.arr_row, self.original_Sr)
+                        num_filter_rows_per_tile.append(row_end_idx - row_start_id + 1)
+                total_num_rows_filter = 0
+                for element in num_filter_rows_per_tile:
+                    total_num_rows_filter += (element - 1)
+                # Calculate the mapping efficiency
+                mac_used = row_used
+                mapping_eff_this_fold = (row_used * col_used) / (self.arr_row * self.arr_col)
+                compute_cycles_this_fold = mac_used * self.T
+                compute_cycles_this_fold += total_num_rows_filter
+                accumulator_cycles_this_fold = math.floor(compute_cycles_this_fold*0.1)-1
+                compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col)
+
+                self.mapping_efficiency_per_fold.append(mapping_eff_this_fold)
+                self.compute_utility_per_fold.append(compute_util_this_fold)
+                self.total_compute_cycles_scnn += (compute_cycles_this_fold + accumulator_cycles_this_fold)
 
     #
     def create_ofmap_demand_mat(self):
