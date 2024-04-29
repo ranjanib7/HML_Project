@@ -166,9 +166,10 @@ class topologies(object):
         assert entry[3] <= entry[1], 'Filter height cannot be larger than IFMAP height'
         assert entry[4] <= entry[2], 'Filter width cannot be larger than IFMAP width'
 
-        entry[1] = math.floor(entry[1] * (1 - self.config.get_sparsity()))
+        breakpoint()
+        entry[1] = math.floor(entry[1] * entry[2] * (1 - self.config.get_sparsity()))
         # entry[2] = math.floor(entry[2] * self.config.get_sparsity())
-        entry[3] = math.floor(entry[3] * (1 - self.config.get_sparsity()))
+        entry[3] = math.floor(entry[3] * entry[4] * (1 - self.config.get_sparsity()))
         # entry[4] = math.floor(entry[4] * self.config.get_sparsity())
 
         self.topo_arrays.append(entry)

@@ -32,6 +32,7 @@ class single_layer_sim:
         self.overall_util = 0
         self.mapping_eff = 0
         self.compute_util = 0
+        self.total_compute_cycles_scnn = 0
 
         # Report items : BW report
         self.avg_ifmap_sram_bw = 0
@@ -219,6 +220,7 @@ class single_layer_sim:
         self.overall_util = (self.num_compute * 100) / (self.total_cycles * self.num_mac_unit)
         self.mapping_eff = self.compute_system.get_avg_mapping_efficiency() * 100
         self.compute_util = self.compute_system.get_avg_compute_utilization() * 100
+        self.total_compute_cycles_scnn = self.compute_system.get_total_compute_cycles_scnn() # Refers to the total compute cycles only.
 
         # BW report
         self.ifmap_sram_reads = self.compute_system.get_ifmap_requests()
@@ -264,7 +266,7 @@ class single_layer_sim:
         if not self.report_items_ready:
             self.calc_report_data()
 
-        items = [self.total_cycles, self.stall_cycles, self.overall_util, self.mapping_eff, self.compute_util]
+        items = [self.total_cycles, self.stall_cycles, self.overall_util, self.mapping_eff, self.compute_util, self.total_compute_cycles_scnn]
         return items
 
     #

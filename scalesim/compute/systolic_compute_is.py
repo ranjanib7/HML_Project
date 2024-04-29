@@ -52,6 +52,7 @@ class systolic_compute_is:
 
         self.mapping_efficiency_per_fold = []
         self.compute_utility_per_fold = []
+        self.total_compute_cycles_scnn = 0
 
         # Flags
         self.params_set_flag = False
@@ -228,6 +229,7 @@ class systolic_compute_is:
         # Need to change col_fold, row_fold.
         print(f"In create ifmap demand matrix")
         # count = 0
+        compute_cycles_this_fold = 0
         for fc in range(self.col_fold):
             for fr in range(self.row_fold):
                 # count += 1
@@ -259,21 +261,24 @@ class systolic_compute_is:
                 this_fold_demand = np.flip(this_fold_demand, 0)
 
                 # Account for the cycles for partial sum generation and accumulation
-                #breakpoint()
-                this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat), axis=0)
+                #this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat), axis=0)
 
                 # Calculate the mapping efficiency
                 row_used = min(self.arr_row, row_end_idx - row_start_id)
                 col_used = min(self.arr_col, col_end_idx - col_start_id)
-                mac_used = row_used * col_used
-                mapping_eff_this_fold = mac_used / (self.arr_row * self.arr_col)
+                #mac_used = row_used * col_used
+                mac_used = row_used
+                mapping_eff_this_fold = (row_used * col_used) / (self.arr_row * self.arr_col)
 
-                cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
+                #cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
+                #cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
                 compute_cycles_this_fold = mac_used * self.T
-                compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col * cycles_this_fold)
+                #compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col * cycles_this_fold)
+                compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col)
 
                 self.mapping_efficiency_per_fold.append(mapping_eff_this_fold)
                 self.compute_utility_per_fold.append(compute_util_this_fold)
+                self.total_compute_cycles_scnn += compute_cycles_this_fold
 
                 if fr == 0 and fc == 0:
                     self.ifmap_demand_matrix = this_fold_demand
@@ -293,44 +298,45 @@ class systolic_compute_is:
 
                 # Indexing the cols with row start and row end idx are correct
                 # See the comment on ifmap_prefetch generation
-                this_fold_demand = self.ifmap_op_old_mat_trans[row_start_id:row_end_idx, col_start_id: col_end_idx]
-                self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
+                this_fold_demand_old = self.ifmap_op_old_mat_trans[row_start_id:row_end_idx, col_start_id: col_end_idx]
+                #self.ifmap_reads += this_fold_demand.shape[0] * this_fold_demand.shape[1]
 
                 # Take into account under utilization
                 if col_delta > 0:
-                    null_req_mat = np.ones((this_fold_demand.shape[0], col_delta)) * -1
-                    this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=1)
+                    null_req_mat = np.ones((this_fold_demand_old.shape[0], col_delta)) * -1
+                    this_fold_demand_old = np.concatenate((this_fold_demand_old, null_req_mat), axis=1)
 
                 if row_delta > 0:
                     null_req_mat = np.ones((row_delta, self.arr_col)) * -1
-                    this_fold_demand = np.concatenate((this_fold_demand, null_req_mat), axis=0)
+                    this_fold_demand_old = np.concatenate((this_fold_demand_old, null_req_mat), axis=0)
 
                 # The IFMAP elems are needed to be filled in reverse order to ensure that
                 # top element is pushed in last to maintain alignment with the input elements
-                this_fold_demand = np.flip(this_fold_demand, 0)
+                this_fold_demand_old = np.flip(this_fold_demand_old, 0)
 
                 # Account for the cycles for partial sum generation and accumulation
-                #breakpoint()
-                this_fold_demand = np.concatenate((this_fold_demand, inter_fold_gap_suffix_mat), axis=0)
+                this_fold_demand_old = np.concatenate((this_fold_demand_old, inter_fold_gap_suffix_mat), axis=0)
 
                 # Calculate the mapping efficiency
                 row_used = min(self.arr_row, row_end_idx - row_start_id)
                 col_used = min(self.arr_col, col_end_idx - col_start_id)
-                mac_used = row_used * col_used
-                mapping_eff_this_fold = mac_used / (self.arr_row * self.arr_col)
+                #mac_used = row_used * col_used
+                #mapping_eff_this_fold = mac_used / (self.arr_row * self.arr_col)
 
-                cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
-                compute_cycles_this_fold = mac_used * self.T
-                compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col * cycles_this_fold)
+                #cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
+                #compute_cycles_this_fold = mac_used * self.T
+                #compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col * cycles_this_fold)
 
-                self.mapping_efficiency_per_fold.append(mapping_eff_this_fold)
-                self.compute_utility_per_fold.append(compute_util_this_fold)
+                #self.mapping_efficiency_per_fold.append(mapping_eff_this_fold)
+                #self.compute_utility_per_fold.append(compute_util_this_fold)
 
                 if fr == 0 and fc == 0:
-                    self.ifmap_demand_old_matrix = this_fold_demand
+                    self.ifmap_demand_old_matrix = this_fold_demand_old
                 else:
-                    self.ifmap_demand_old_matrix = np.concatenate((self.ifmap_demand_old_matrix, this_fold_demand), axis=0)
-
+                    self.ifmap_demand_old_matrix = np.concatenate((self.ifmap_demand_old_matrix, this_fold_demand_old), axis=0)
+        
+        # TODO: Fix
+        self.total_compute_cycles_scnn += 1
         # Skew is not needed in IFMAP for IS
 
     #
@@ -556,7 +562,10 @@ class systolic_compute_is:
     def get_ofmap_requests(self):
         assert self.demand_mat_ready_flag, 'Computes not ready yet'
         return self.ofmap_writes
-
+    
+    def get_total_compute_cycles_scnn(self):
+        assert self.demand_mat_ready_flag, 'Computes not ready yet'
+        return self.total_compute_cycles_scnn
 
 #
 def skew_matrix(input_matrix_np):

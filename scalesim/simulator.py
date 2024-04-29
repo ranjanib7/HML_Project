@@ -84,10 +84,12 @@ class simulator:
                 stall_cycles = comp_items[1]
                 util = comp_items[2]
                 mapping_eff = comp_items[3]
+                total_comp_cycles_scnn = comp_items[5]
                 print('Compute cycles: ' + str(comp_cycles))
                 print('Stall cycles: ' + str(stall_cycles))
                 print('Overall utilization: ' + "{:.2f}".format(util) +'%')
                 print('Mapping efficiency: ' + "{:.2f}".format(mapping_eff) +'%')
+                print('Total Compute Cycles (SCNN): ' + str(total_comp_cycles_scnn))
 
                 avg_bw_items = single_layer_obj.get_bandwidth_report_items()
                 avg_ifmap_bw = avg_bw_items[3]
