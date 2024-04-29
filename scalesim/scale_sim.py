@@ -140,7 +140,6 @@ class scalesim:
             print('Working in USE USER BANDWIDTH mode.')
         else:
             print('Working in ESTIMATE BANDWIDTH mode.')
-        print(f'Sparsity: {self.config.get_sparsity()}')
 
         print("====================================================")
 

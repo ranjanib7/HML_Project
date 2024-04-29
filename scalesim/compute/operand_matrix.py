@@ -32,11 +32,12 @@ class operand_matrix(object):
         self.matrix_offset_arr = [0, 10000000, 20000000]
 
         # Address matrices
+        self.sparse_dims = self.ifmap_cols * self.ifmap_rows
         self.ifmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.conv_window_size), dtype=int)
-        self.new_input_operand_matrix = np.ones((self.ifmap_rows*self.ifmap_cols, self.ifmap_rows*self.ifmap_cols), dtype=int)
+        self.new_input_operand_matrix = np.ones((self.sparse_dims, self.sparse_dims), dtype=int)
         self.filter_addr_matrix = np.ones((self.conv_window_size, self.num_filters), dtype=int)
         self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype=int)
-        self.ofmap_intermediate_op_matrix = np.ones((self.ifmap_rows*self.ifmap_cols, self.ifmap_rows*self.ifmap_cols), dtype=int)
+        self.ofmap_intermediate_op_matrix = np.ones((self.sparse_dims, self.sparse_dims), dtype=int)
 
         # Flags
         self.params_set_flag = False

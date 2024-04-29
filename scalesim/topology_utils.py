@@ -1,5 +1,4 @@
 import math
-from scalesim.scale_config import scale_config as cfg
 
 
 class topologies(object):
@@ -14,7 +13,6 @@ class topologies(object):
         self.topo_load_flag = False
         self.topo_calc_hyper_param_flag = False
         self.topo_calc_spatiotemp_params_flag = False
-        self.config = cfg()
 
     # reset topology parameters
     def reset(self):
@@ -95,7 +93,8 @@ class topologies(object):
             if first or row == '':
                 first = False
             else:
-                elems = row.split(',')[:-1]
+                #elems = row.split(',')[:-1]
+                elems = row.split(',')[:]
                 # depth-wise convolution
                 if 'DP' in elems[0].strip():
                     for dp_layer in range(int(elems[5].strip())):
@@ -137,7 +136,9 @@ class topologies(object):
                     "Channels",
                     "Num filter",
                     "Stride height",
-                    "Stride width"
+                    "Stride width",
+                    "Input Sparsity",
+                    "Weight Sparsity"
                 ]
 
         f = open(filename, 'w')
@@ -156,20 +157,22 @@ class topologies(object):
     def append_topo_arrays(self, layer_name, elems):
         entry = [layer_name]
 
-        for i in range(1, len(elems)):
+        for i in range(1, len(elems)-2):
             val = int(str(elems[i]).strip())
             entry.append(val)
-            if i == 7 and len(elems) < 9:
-                entry.append(val)  # Add the same stride in the col direction automatically
+            #if i == 9 and len(elems) < 10:
+                #entry.append(val)  # Add the same stride in the col direction automatically
+        for i in range(len(elems)-2, len(elems)):
+            val = float(str(elems[i]).strip())
+            entry.append(val)
 
         # ISSUE #9 Fix
         assert entry[3] <= entry[1], 'Filter height cannot be larger than IFMAP height'
         assert entry[4] <= entry[2], 'Filter width cannot be larger than IFMAP width'
 
-        breakpoint()
-        entry[1] = math.floor(entry[1] * entry[2] * (1 - self.config.get_sparsity()))
+        #entry[1] = math.floor(entry[1] * entry[2] * (1 - self.config.get_sparsity()))
         # entry[2] = math.floor(entry[2] * self.config.get_sparsity())
-        entry[3] = math.floor(entry[3] * entry[4] * (1 - self.config.get_sparsity()))
+        #entry[3] = math.floor(entry[3] * entry[4] * (1 - self.config.get_sparsity()))
         # entry[4] = math.floor(entry[4] * self.config.get_sparsity())
 
         self.topo_arrays.append(entry)
@@ -190,7 +193,7 @@ class topologies(object):
 
     # add to the existing data from a list
     def append_layer_entry(self, entry, toponame=""):
-        assert len(entry) == 9, 'Incorrect number of parameters'
+        assert len(entry) == 11, 'Incorrect number of parameters'
 
         if not toponame == "":
             self.current_topo_name = toponame
@@ -213,7 +216,11 @@ class topologies(object):
             num_ch   = array[5]
             num_filt = array[6]
             stride_h = array[7]
-            stride_w = array[8]
+            stride_w = array[7]
+            sparsity_ip = array[8]
+            sparsity_filt = array[9]
+            ifmap_h = int(math.ceil(ifmap_h * (1-sparsity_ip)))
+            filt_h = int(math.ceil(filt_h * (1-sparsity_filt)))
             ofmap_h = int(math.ceil((ifmap_h - filt_h + stride_h) / stride_h))
             ofmap_w = int(math.ceil((ifmap_w - filt_w + stride_w) / stride_w))
             # print(f"ifmap_h: {ifmap_h}, ifmap_w: {ifmap_w}, filt_h: {filt_h}, filt_w: {filt_w}")

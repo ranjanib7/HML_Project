@@ -22,8 +22,6 @@ class scale_config:
         self.topofile = ""
         self.bandwidths = []
         self.valid_conf_flag = False
-        breakpoint()
-        self.sparsity = 0
 
         self.valid_df_list = ['os', 'ws', 'is']
 
@@ -60,8 +58,7 @@ class scale_config:
         self.filter_offset = int(config.get(section, 'FilterOffset'))
         self.ofmap_offset = int(config.get(section, 'OfmapOffset'))
         self.df = config.get(section, 'Dataflow')
-        self.sparsity = float(config.get(section, 'Sparsity'))
-        breakpoint()
+
 
         # Anand: ISSUE #2. Patch
         if self.use_user_bandwidth:
@@ -134,7 +131,6 @@ class scale_config:
 
         config.set(section, 'Dataflow', str(self.df))
         config.set(section, 'Bandwidth', ','.join([str(x) for x in self.bandwidths]))
-        config.set(section, 'Sparsity', str(self.sparsity))
 
         section = 'network_presets'
         config.add_section(section)
@@ -181,10 +177,6 @@ class scale_config:
     def set_bw_mode_to_calc(self):
         self.use_user_bandwidth = False
 
-    def set_sparsity(self):
-        breakpoint()
-        self.sparsity = 0
-
     #
     def use_user_dram_bandwidth(self):
         if not self.valid_conf_flag:
@@ -218,8 +210,6 @@ class scale_config:
 
         out_list.append(str(self.df))
         out_list.append(str(self.topofile))
-
-        out_list.append(str(self.sparsity))
        
         return out_list
 
@@ -283,10 +273,7 @@ class scale_config:
             print(message)
         else:
             return min(self.bandwidths)
-    
-    def get_sparsity(self):
-        #assert self.valid_conf_flag == False
-        return self.sparsity
+
 
     # FIX ISSUE #14
     @staticmethod
