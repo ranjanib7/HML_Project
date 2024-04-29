@@ -273,12 +273,13 @@ class systolic_compute_is:
                 #cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
                 #cycles_this_fold = this_fold_demand.shape[0] + this_fold_demand.shape[1] - 1
                 compute_cycles_this_fold = mac_used * self.T
+                accumulator_cycles_this_fold = math.floor(compute_cycles_this_fold*0.1)-1
                 #compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col * cycles_this_fold)
                 compute_util_this_fold = compute_cycles_this_fold / (self.arr_row * self.arr_col)
 
                 self.mapping_efficiency_per_fold.append(mapping_eff_this_fold)
                 self.compute_utility_per_fold.append(compute_util_this_fold)
-                self.total_compute_cycles_scnn += compute_cycles_this_fold
+                self.total_compute_cycles_scnn += (compute_cycles_this_fold + accumulator_cycles_this_fold)
 
                 if fr == 0 and fc == 0:
                     self.ifmap_demand_matrix = this_fold_demand

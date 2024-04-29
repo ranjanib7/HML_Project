@@ -39,6 +39,23 @@ class operand_matrix(object):
         self.ofmap_addr_matrix = np.ones((self.ofmap_px_per_filt, self.num_filters), dtype=int)
         self.ofmap_intermediate_op_matrix = np.ones((self.sparse_dims, self.sparse_dims), dtype=int)
 
+        # SCNN dense Matrices
+        self.if_row_orig, self.if_col_orig = 1,1
+        self.ifmap_original_op = np.ones((self.if_row_orig * self.if_col_orig), dtype=int)
+        self.filt_row_orig, self.filt_col_orig = 1,1
+        self.filt_original_op = np.ones((self.filt_row_orig * self.filt_col_orig), dtype=int)
+        self.op_dims_orig = ((self.if_row_orig*self.if_col_orig)-(self.filt_row_orig*self.filt_col_orig)+1)
+        self.ofmap_original_op = np.ones(self.op_dims_orig, dtype=int)
+
+        #SCNN Sparse matrices
+        self.sparsity_ip, self.sparsity_filt = 0,0
+        self.ip_sparse_len = math.ceil(self.if_row_orig * self.if_col_orig*(1-self.sparsity_ip))
+        self.ifmap_sparse_op = np.ones((self.ip_sparse_len), dtype=int)
+        self.filt_sparse_len = math.ceil(self.filt_row_orig * self.filt_col_orig*(1-self.sparsity_filt))
+        self.filt_sparse_op = np.ones((self.filt_sparse_len), dtype=int)
+        self.op_sparse_len = self.ip_sparse_len * self.filt_sparse_len
+        self.ofmap_sparse_op = np.ones(self.op_sparse_len, dtype=int)
+
         # Flags
         self.params_set_flag = False
         self.matrices_ready_flag = False
@@ -79,6 +96,26 @@ class operand_matrix(object):
         self.num_input_channels = self.topoutil.get_layer_num_channels(self.layer_id)
         self.num_filters = self.topoutil.get_layer_num_filters(self.layer_id)
         self.row_stride, self.col_stride = self.topoutil.get_layer_strides(self.layer_id)
+
+        # SCNN dense params
+        self.if_row_orig, self.if_col_orig = self.topoutil.get_layer_scnn_ifmap_dense_dimms(self.layer_id)
+        self.filt_row_orig, self.filt_col_orig = self.topoutil.get_layer_scnn_filter_dense_dims(self.layer_id)
+
+        #SCNN Sparse params
+        self.sparsity_ip, self.sparsity_filt = self.topoutil.get_layer_scnn_sparsity(self.layer_id)
+
+        # SCNN Matrices set params
+        self.ifmap_original_op = np.ones((self.if_row_orig * self.if_col_orig), dtype='>i4')
+        self.filt_original_op = np.ones((self.filt_row_orig * self.filt_col_orig), dtype='>i4')
+        self.op_dims_orig = ((self.if_row_orig*self.if_col_orig)-(self.filt_row_orig*self.filt_col_orig)+1)
+        self.ofmap_original_op = np.ones(self.op_dims_orig, dtype='>i4')
+        self.ip_sparse_len = math.ceil(self.if_row_orig * self.if_col_orig*(1-self.sparsity_ip))
+        self.ifmap_sparse_op = np.ones((self.ip_sparse_len), dtype='>i4')
+        self.filt_sparse_len = math.ceil(self.filt_row_orig * self.filt_col_orig*(1-self.sparsity_filt))
+        self.filt_sparse_op = np.ones((self.filt_sparse_len), dtype='>i4')
+        self.op_sparse_len = self.ip_sparse_len * self.filt_sparse_len
+        self.ofmap_sparse_op = np.ones(self.op_sparse_len, dtype='>i4')
+
         # TODO: Marked for cleanup
         #self.row_stride = layer_hyper_param_arr[6]
         #if len(layer_hyper_param_arr) == 8:
@@ -138,6 +175,11 @@ class operand_matrix(object):
         retcode_2 = self.create_filter_matrix()
         retcode_3 = self.create_ofmap_matrix()
 
+        # SCNN Matrix creation
+        self.create_scnn_ifmap_orig_matrix()
+        self.create_scnn_filter_orig_matrix()
+        self.create_scnn_ofmap_orig_matrix()
+
         retcode = retcode_1 + retcode_2 + retcode_3
         if retcode == 0:
             self.matrices_ready_flag = True
@@ -162,6 +204,22 @@ class operand_matrix(object):
         # Call calc_ifmap_elem_addr_numpy with 2D index arrays
         self.ifmap_addr_matrix = self.calc_ifmap_elem_addr(i, j)
 
+        return 0
+    
+    def create_scnn_ifmap_orig_matrix(self):
+        my_name = 'operand matric.create_scnn_ifmap_matrix()'
+        err_prefix = 'Error: ' + my_name
+
+        if not self.params_set_flag:
+            message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
+            print(message)
+            return -1
+        
+        offset = self.ifmap_offset
+
+        for i in range(self.if_row_orig * self.if_col_orig):
+            self.ifmap_original_op[i] = offset
+            offset += 1
         return 0
 
     # logic to translate ifmap into matrix fed into systolic array MACs
@@ -204,6 +262,14 @@ class operand_matrix(object):
         self.ofmap_addr_matrix = self.calc_ofmap_elem_addr(row_indices, col_indices)
 
         return 0
+    
+    def create_scnn_ofmap_orig_matrix(self):
+        my_name = 'operand_matrix.create_ofmap_matrix(): '
+        err_prefix = 'Error: ' + my_name
+        if not self.params_set_flag:
+            message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
+            print(message)
+            return -1
 
     # logic to translate ofmap into matrix resulting systolic array MACs
     def calc_ofmap_elem_addr(self, i, j):
@@ -225,6 +291,23 @@ class operand_matrix(object):
         row_indices = np.expand_dims(np.arange(self.conv_window_size), axis=1)
         col_indices = np.arange(self.num_filters)
         self.filter_addr_matrix = self.calc_filter_elem_addr(row_indices, col_indices)
+
+        return 0
+    
+    def create_scnn_filter_orig_matrix(self):
+        my_name = 'operand matrix.create_scnn_filter_matrix()'
+        err_prefix = 'Error: ' + my_name
+
+        if not self.params_set_flag:
+            message = err_prefix + 'Parameters not set yet. Run set_params(). Exiting'
+            print(message)
+            return -1
+        
+        offset = self.filter_offset
+
+        for i in range(self.filt_row_orig * self.filt_col_orig):
+            self.filt_original_op[i] = offset
+            offset += 1
 
         return 0
 

@@ -130,6 +130,8 @@ class single_layer_sim:
         ifmap_prefetch_mat, ifmap_prefetch_old_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
         ifmap_demand_mat, ifmap_demand_old_mat, filter_demand_mat, filter_demand_old_mat, ofmap_demand_mat, ofmap_demand_old_mat = self.compute_system.get_demand_matrices()
 
+        # SCNN Sparse Calculation
+
         #print('DEBUG: Compute operations done')
         # 2. Setup the memory system and run the demands through it to find any memory bottleneck and generate traces
 
