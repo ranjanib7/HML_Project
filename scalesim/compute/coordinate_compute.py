@@ -4,7 +4,7 @@ class coordinate_compute_blk:
     def __init__(self) -> None:
         pass
 
-    def find_output_coordinates(self, ifmap_op_mat, filter_op_mat):
+    def find_output_coordinates_old(self, ifmap_op_mat, filter_op_mat):
         output_coordinates = []
         input_rows = len(ifmap_op_mat.input_indptr)-1
         input_cols = max(ifmap_op_mat.input_indices) + 1
@@ -36,6 +36,9 @@ class coordinate_compute_blk:
                 output_coordinates.append(output_indices)
 
         return output_coordinates
+    
+    def find_output_coordinates(self, input, filter):
+        pass
 
     def csr_to_dense_coordinates(self, indptr, indices):
         #data, indptr, indices = compress_sparse_matrix(matrix)

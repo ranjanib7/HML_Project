@@ -13,6 +13,8 @@ class topologies(object):
         self.topo_load_flag = False
         self.topo_calc_hyper_param_flag = False
         self.topo_calc_spatiotemp_params_flag = False
+        self.original_dims = []
+        self.modified_dims = []
 
     # reset topology parameters
     def reset(self):
@@ -24,6 +26,8 @@ class topologies(object):
         self.num_layers = 0
         self.topo_calc_hyper_param_flag = False
         self.layers_calculated_hyperparams = []
+        self.original_dims = []
+        self.modified_dims = []
 
     #
     def load_layer_params_from_list(self, layer_name, elems_list=[]):
@@ -170,11 +174,6 @@ class topologies(object):
         assert entry[3] <= entry[1], 'Filter height cannot be larger than IFMAP height'
         assert entry[4] <= entry[2], 'Filter width cannot be larger than IFMAP width'
 
-        #entry[1] = math.floor(entry[1] * entry[2] * (1 - self.config.get_sparsity()))
-        # entry[2] = math.floor(entry[2] * self.config.get_sparsity())
-        #entry[3] = math.floor(entry[3] * entry[4] * (1 - self.config.get_sparsity()))
-        # entry[4] = math.floor(entry[4] * self.config.get_sparsity())
-
         self.topo_arrays.append(entry)
 
     # create network topology array
@@ -219,6 +218,13 @@ class topologies(object):
             stride_w = array[7]
             sparsity_ip = array[8]
             sparsity_filt = array[9]
+            original_dims = [ifmap_w, ifmap_h, filt_w, filt_h]
+            ofmap_h = int(math.ceil((ifmap_h - filt_h + stride_h) / stride_h))
+            ofmap_w = int(math.ceil((ifmap_w - filt_w + stride_w) / stride_w))
+            original_dims += [ofmap_w, ofmap_h]
+            self.original_dims.append(original_dims)
+
+            # update dimensions after sparsity
             ifmap_h = int(math.ceil(ifmap_h * (1-sparsity_ip)))
             filt_h = int(math.ceil(filt_h * (1-sparsity_filt)))
             ofmap_h = int(math.ceil((ifmap_h - filt_h + stride_h) / stride_h))
@@ -228,6 +234,9 @@ class topologies(object):
             window_size = filt_h * filt_w * num_ch
             entry = [ofmap_h, ofmap_w, num_mac, window_size]
             self.layers_calculated_hyperparams.append(entry)
+            modified_dims = [ifmap_h, ifmap_w, filt_h, filt_w, ofmap_h, ofmap_w, num_mac, window_size]
+            self.modified_dims.append(modified_dims)
+
         self.topo_calc_hyper_param_flag = True
 
     def calc_spatio_temporal_params(self, df='os', layer_id=0):
@@ -299,17 +308,23 @@ class topologies(object):
     def get_layer_ifmap_dims(self, layer_id=0):
         if not (self.topo_load_flag or self.num_layers - 1 < layer_id):
             print("ERROR: topologies.get_layer_ifmap_dims: Invalid layer id")
-
-        layer_params = self.topo_arrays[layer_id]
-        return layer_params[1:3]    # Idx = 1, 2
+        if not self.topo_calc_hyper_param_flag:
+            self.topo_calc_hyperparams()
+        dims = self.modified_dims[layer_id]
+        return dims[0:2]
+        #layer_params = self.topo_arrays[layer_id]
+        #return layer_params[1:3]    # Idx = 1, 2
 
     #
     def get_layer_filter_dims(self, layer_id=0):
         if not (self.topo_load_flag or self.num_layers - 1 < layer_id):
             print("ERROR: topologies.get_layer_ifmap_dims: Invalid layer id")
-
-        layer_params = self.topo_arrays[layer_id]
-        return layer_params[3:5]    # Idx = 3, 4
+        if not self.topo_calc_hyper_param_flag:
+            self.topo_calc_hyperparams()
+        dims = self.modified_dims[layer_id]
+        return dims[2:4]
+        #layer_params = self.topo_arrays[layer_id]
+        #return layer_params[3:5]    # Idx = 3, 4
 
     #
     def get_layer_num_filters(self, layer_id=0):
@@ -338,17 +353,21 @@ class topologies(object):
             print("ERROR: topologies.get_layer_num_filter: Invalid layer id")
         if not self.topo_calc_hyper_param_flag:
             self.topo_calc_hyperparams()
-        layer_calc_params = self.layers_calculated_hyperparams[layer_id]
-        return layer_calc_params[3]
+        #layer_calc_params = self.layers_calculated_hyperparams[layer_id]
+        #return layer_calc_params[3]
+        dims = self.modified_dims[layer_id]
+        return dims[7]
 
     def get_layer_num_ofmap_px(self, layer_id=0):
         if not (self.topo_load_flag or self.num_layers - 1 < layer_id):
             print("ERROR: topologies.get_layer_num_filter: Invalid layer id")
         if not self.topo_calc_hyper_param_flag:
             self.topo_calc_hyperparams()
-        layer_calc_params = self.layers_calculated_hyperparams[layer_id]
+        #layer_calc_params = self.layers_calculated_hyperparams[layer_id]
         num_filters = self.get_layer_num_filters(layer_id)
-        num_ofmap_px = layer_calc_params[0] * layer_calc_params[1] * num_filters 
+        dims = self.modified_dims[layer_id]
+        #num_ofmap_px = layer_calc_params[0] * layer_calc_params[1] * num_filters 
+        num_ofmap_px = dims[4] * dims[5] * num_filters
         return num_ofmap_px
 
     def get_layer_ofmap_dims(self, layer_id=0):
@@ -356,7 +375,8 @@ class topologies(object):
             print("ERROR: topologies.get_layer_ofmap_dims: Invalid layer id")
         if not self.topo_calc_hyper_param_flag:
             self.topo_calc_hyperparams()
-        ofmap_dims = self.layers_calculated_hyperparams[layer_id][0:2]
+        #ofmap_dims = self.layers_calculated_hyperparams[layer_id][0:2]
+        ofmap_dims = self.modified_dims[layer_id][4:6]
         return ofmap_dims
 
     def get_layer_params(self, layer_id=0):
