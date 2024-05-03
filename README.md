@@ -1,4 +1,4 @@
-# Systolic CNN AcceLErator Simulator with Sparse functiality (SCALE Sim) v3_latest
+# Efficient Sparse CNN Exploration with SCALE-Sim
 
 [![Documentation Status](https://readthedocs.org/projects/scale-sim-project/badge/?version=latest)](https://scale-sim-project.readthedocs.io/en/latest/?badge=latest)
 
@@ -23,11 +23,25 @@ Sample run after running python/scale.py with the above changes for a 64x64 syst
 ![sample_run](https://github.com/ranjanib7/HML_Project/assets/36790410/90bbb2cf-dec0-4dc3-af39-8dcd2b7c90c1)
 
 
-
 ### Output
 
 Here is an example output dumped to stdout when running test.csv with the following configurations: IFMAP Dimensions - 3x3, Filter Dimensions: 2x2, Array Dimensions: 3x3, Sparsity for Filter and Input is set to 0.
 ![matrices](https://github.com/ranjanib7/HML_Project/assets/36790410/ad02c9f1-c03a-49f6-927d-a01ab874293e)
+
+### Results
+
+We have used the Total Compute Cycles (SCNN) variable to log the number of cycles and mapping efficiency. To calculate the time consumed my the process, the script was run as "time python scale.py"
+![image](https://github.com/ranjanib7/HML_Project/assets/36790410/4522969f-0067-4be3-82ec-3a88e4c6451e)
+
+
+![result1](https://github.com/ranjanib7/HML_Project/assets/36790410/b58505b2-8bf0-409f-b2f4-febcc4e1dc00)
+
+![result2](https://github.com/ranjanib7/HML_Project/assets/36790410/d38c3479-114c-4fb0-8461-12a55d8cb765)
+
+![result3](https://github.com/ranjanib7/HML_Project/assets/36790410/a7360b4c-43d4-485d-b2c1-0760d9e2ec61)
+
+![result4](https://github.com/ranjanib7/HML_Project/assets/36790410/13de078d-e8a3-486c-9b89-20636ca823e0)
+
 
 ## Developers
 
