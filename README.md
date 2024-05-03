@@ -76,40 +76,6 @@ There are three summary logs:
 
 In addition cycle accurate SRAM/DRAM access logs are also dumped and could be accesses at ```<outputs_dir>/<run_name>/``` eg `<run_dir>/../scalesim_outputs/<run_name>`
 
-## Detailed Documentation
-
-Detailed documentation about the tool can be found [here](https://scale-sim-project.readthedocs.io/en/latest/).
-
-We also recommend referring to the following papers for insights on SCALE-Sim's potential.
-
-[1] Samajdar, A., Zhu, Y., Whatmough, P., Mattina, M., & Krishna, T.;  **"Scale-sim: Systolic cnn accelerator simulator."** arXiv preprint arXiv:1811.02883 (2018). [\[pdf\]](https://arxiv.org/abs/1811.02883)
-
-[2] Samajdar, A., Joseph, J. M., Zhu, Y., Whatmough, P., Mattina, M., & Krishna, T.; **"A systematic methodology for characterizing scalability of DNN accelerators using SCALE-sim"**. In 2020 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS). [\[pdf\]](https://cpb-us-w2.wpmucdn.com/sites.gatech.edu/dist/c/332/files/2020/03/scalesim_ispass2020.pdf)
-
-## Citing this work
-
-If you found this tool useful, please use the following bibtex to cite us
-
-```
-@article{samajdar2018scale,
-  title={SCALE-Sim: Systolic CNN Accelerator Simulator},
-  author={Samajdar, Ananda and Zhu, Yuhao and Whatmough, Paul and Mattina, Matthew and Krishna, Tushar},
-  journal={arXiv preprint arXiv:1811.02883},
-  year={2018}
-}
-
-@inproceedings{samajdar2020systematic,
-  title={A systematic methodology for characterizing scalability of DNN accelerators using SCALE-sim},
-  author={Samajdar, Ananda and Joseph, Jan Moritz and Zhu, Yuhao and Whatmough, Paul and Mattina, Matthew and Krishna, Tushar},
-  booktitle={2020 IEEE International Symposium on Performance Analysis of Systems and Software (ISPASS)},
-  pages={58--68},
-  year={2020},
-  organization={IEEE}
-}
-```
-
-
-
 
 ## Developers
 
