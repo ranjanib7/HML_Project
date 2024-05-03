@@ -8,73 +8,26 @@ Our code integrates SCNN  a novel Sparse CNN (SCNN) accelerator architecture aim
 ![scnn_design_2](https://github.com/ranjanib7/HML_Project/assets/36790410/fd58e4bf-c2bc-4b7e-bdc4-423e18265865)
 
 
-## Getting started in 30 seconds
-
-
-
 ### *Launching a run*
 
-SCALE-Sim can be run by using the ```scale.py``` script from the repository and providing the paths to the architecture configuration, and the topology descriptor csv file.
+SCALE-Sim can be run by using the ```scale.py``` script from the scalesim repository and providing the paths to the architecture configuration, and the topology descriptor csv file.
 
 ```$ python3 scale.py -c <path_to_config_file> -t <path_to_topology_file> -p <path_to_output_log_dir>```
 
-Try it now in this jupyter [notebook](https://github.com/scalesim-project/scalesim-tutorial-materials/blob/main/scaledemo.ipynb).
+For our testing purposes, we have used the scale.cfg in the configs directory and the topology file used is test.csv in topology/conv_nets
+Since this project is an extension of SCALE-Sim, in addition to the modifications in the cfg file, we have added a new parameter in the topology file test.csv, to represent the Sparsity in the IFMAP and Filter matrices as a percentage.
+The modifications made in the topology file are:
+![modifications_code](https://github.com/ranjanib7/HML_Project/assets/36790410/42575881-fd0b-4448-aec4-72483fd71a70)
 
-### *Running from source*
+Sample run after running python/scale.py with the above changes for a 64x64 systolic array are:
+![sample_run](https://github.com/ranjanib7/HML_Project/assets/36790410/90bbb2cf-dec0-4dc3-af39-8dcd2b7c90c1)
 
-The above method uses the installed package for running the simulator.
-In cases where you would like to run directly from the source, the following command should be used instead.
 
-```$ python3 <scale_sim_repo_root>/scalesim/scale.py -c <path_to_config_file> -t <path_to_topology_file>```
-
-If you are running from sources for the first time and do not have all the dependencies installed, please install them first  using the following command.
-
-```$ pip3 install -r <scale_sim_repo_root>/requirements.txt```
-
-## Tool inputs
-
-SCALE-Sim uses two input files to run, a configuration file and a topology file.
-
-### Configuration file
-
-The configuration file is used to specify the architecture and run parameters for the simulations.
-The following shows a sample config file:
-
-![sample config](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/config-file-example.png "sample config")
-
-The config file has three sections. The "*general*" section specifies the run name, which is user specific. The "*architecture_presets*" section describes the parameter of the systolic array hardware to simulate.
-The "*run_preset*" section specifies if the simulator should run with user specified bandwidth, or should it calculate the optimal bandwidth for stall free execution.
-
-The detailed documentation for the config file could be found **here (TBD)**
-
-### Topology file
-
-The topology file is a *CSV* file which decribes the layers of the workload topology. The layers are typically described as convolution layer parameters as shown in the example below.
-
-![sample topo](https://github.com/scalesim-project/scale-sim-v2/blob/main/documentation/resources/topo-file-example.png "sample topo")
-
-For other layer types, SCALE-Sim also accepts the workload desciption in M, N, K format of the equivalent GEMM operation as shown in the example below.
-
-![sample mnk topo](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/topo-mnk-file-example.png "sample mnk topo")
-
-The tool however expects the inputs to be in the convolution format by default. When using the mnk format for input, please specify using the  ```-i gemm``` switch, as shown in the example below.
-
-```$ python3 <scale sim repo root>/scalesim/scale.py -c <path_to_config_file> -t <path_to_mnk_topology_file> -i gemm```
 
 ### Output
 
-Here is an example output dumped to stdout when running Yolo Tiny (whose configuration is in yolo_tiny.csv):
-![screen_out](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/output.png "std_out")
-
-Also, the simulator generates read write traces and summary logs at ```<run_dir>/../scalesim_outputs/```. The user can also provide a custom location using ```-p <custom_output_directory>``` when using `scalesim.py` file.
-There are three summary logs:
-
-* COMPUTE_REPORT.csv: Layer wise logs for compute cycles, stalls, utilization percentages etc.
-* BANDWIDTH_REPORT.csv: Layer wise information about average and maximum bandwidths for each operand when accessing SRAM and DRAM
-* DETAILED_ACCESS_REPORT.csv: Layer wise information about number of accesses and access cycles for each operand for SRAM and DRAM.
-
-In addition cycle accurate SRAM/DRAM access logs are also dumped and could be accesses at ```<outputs_dir>/<run_name>/``` eg `<run_dir>/../scalesim_outputs/<run_name>`
-
+Here is an example output dumped to stdout when running test.csv with the following configurations: IFMAP Dimensions - 3x3, Filter Dimensions: 2x2, Array Dimensions: 3x3, Sparsity for Filter and Input is set to 0.
+![matrices](https://github.com/ranjanib7/HML_Project/assets/36790410/ad02c9f1-c03a-49f6-927d-a01ab874293e)
 
 ## Developers
 
