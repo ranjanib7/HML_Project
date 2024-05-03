@@ -1,2 +1,2 @@
 Layer name, IFMAP Height, IFMAP Width, Filter Height, Filter Width, Channels, Num Filter, Strides, Input Sparsity, Filter Sparsity
-Inc5b_3x3, 64, 64, 37, 37, 1, 1, 1, 0.25, 0.6
+Inc5b_3x3, 90, 90, 3, 3, 1, 1, 1, 0, 0.1

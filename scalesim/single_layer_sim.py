@@ -129,6 +129,7 @@ class single_layer_sim:
         # 1.3 Get the no compute demand matrices from for 2 operands and the output
         ifmap_prefetch_mat, ifmap_prefetch_old_mat, filter_prefetch_mat = self.compute_system.get_prefetch_matrices()
         ifmap_demand_mat, ifmap_demand_old_mat, filter_demand_mat, filter_demand_old_mat, ofmap_demand_mat, ofmap_demand_old_mat = self.compute_system.get_demand_matrices()
+        #breakpoint()
 
         # SCNN Sparse Calculation
 

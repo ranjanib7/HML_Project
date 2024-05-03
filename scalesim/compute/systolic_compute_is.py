@@ -362,6 +362,8 @@ class systolic_compute_is:
                 self.compute_utility_per_fold.append(compute_util_this_fold)
                 self.total_compute_cycles_scnn += (compute_cycles_this_fold + accumulator_cycles_this_fold)
 
+        self.total_compute_cycles_scnn += 1
+
     #
     def create_ofmap_demand_mat(self):
         assert self.params_set_flag, 'Parameters are not set'
