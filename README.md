@@ -1,9 +1,9 @@
-# Systolic CNN AcceLErator Simulator (SCALE Sim) v2
+# Systolic CNN AcceLErator Simulator with Sparse functiality (SCALE Sim) v3_latest
 
 [![Documentation Status](https://readthedocs.org/projects/scale-sim-project/badge/?version=latest)](https://scale-sim-project.readthedocs.io/en/latest/?badge=latest)
 
-SCALE Sim is a simulator for systolic array based accelerators for Convolution, Feed Forward, and any layer that uses GEMMs.
-This is a refreshed version of the simulator with feature enhancements, restructured code to aid feature additions, and ease of distribution.
+
+Our code integrates SCNN \cite{parashar2017scnn}, a novel Sparse CNN (SCNN) accelerator architecture aimed at enhancing the performance and energy efficiency of Convolutional Neural Networks (CNNs) into SCALESim. SCALESim \cite{samajdar2018scalesim} serves as a Systolic Array simulator, aiding designers in fine-tuning accelerator parameters for executing diverse models and conducting Data Space Exploration (DSE). However, its capability to furnish optimal performance metrics for Sparse CNNs is limited. This limitation arises from the inclusion of compute cycles that process multiplications for operands with zero values. Eliminating such redundant computations can effectively reduce overall compute cycles. We investigate the impact of sparsity percentages in the input and filter matrices on both compute cycles and mapping efficiency.
 
 ![scalesim overview](https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/scalesim-overview.png "scalesim overview")
 
@@ -11,17 +11,7 @@ The previous version of the simulator can be found [here](https://github.com/ARM
 
 ## Getting started in 30 seconds
 
-### *Installing the package*
 
-Getting started is simple! SCALE-Sim is completely written in python and is available both as a package and could be run from source.
-
-You can install SCALE-Sim in your environment using the following command
-
-```$ pip3 install scalesim```
-
-Alternatively you can install the package from the source as well
-
-```$ python3 setup.py install```
 
 ### *Launching a run*
 
@@ -142,17 +132,11 @@ email, or any other method with the owners of this repository before making a ch
 ## Developers
 
 Main devs:
-* Ananda Samajdar (@AnandS09)
-* Jan Moritz Joseph (@jmjos)
+* Ranjani Balasubramanyam(@rbalasub32)
+* Abhipsa Panigrahi(@apanigrahi33)
+* Aakash Venkataraman (@avenkata44)
+* Ashwin Kulkarni (@akulkarni379)
+* Ketan Anand (@kanand)
 
-Contributers:
-* Ritik Raj (@ritikraj7)
 
-Maintainers and Advisors
-* Yuhao Zhu
-* Paul Whatmough
-* Tushar Krishna
 
-Past contributors
-* Vineet Nadella
-* Sachit Kuhar
