@@ -121,4 +121,44 @@ Main devs:
 * Ketan Anand (@kanand)
 
 
+## Individual Contributions
+
+Ashwin Kulkarni:
+Compute unit implementation: Worked on the streaming of weights, and tiling of inputs, and fetched the data that should be stored in the accumulator matrix.
+Worked on the development of the systolic array conversion to multiplier arrays for SCNN.
+Ideation - Responsible for literature review to decide between SCNN and VEGETA architectures for integration with SCALESim.
+Presentation and Poster - Collaborated on the development and presentation of Poster.
+      
+Ranjani Balasubramanyam
+Worked on converting the MAC Units in SCALESim to multiplier arrays and generating the updated operand matrices to incorporate SCNN Cartesian Product computation.
+Worked on integrating sparsity calculation and implementing design changes to the existing SCALESim to improve performance for sparse networks.
+Worked on modifying the handling accumulator and multiplication cycles in the updated framework to account for parallel multiplication and accumulations in the SCNN Dataflow.
+Contributed to the development of poster and report.
+Presentation
+
+Ketan Anand
+Compute unit implementation: Work on the streaming of weights, tiling, get the data to be stored in the accumulator matrix
+Convolution part, give coordinates of valid convolution outputs, handle storing these in accumulator.
+Analytical calculation of compute cycles for multiplication and accumulation
+Performance anaylsis over different filter and input sparsities
+Poster development and presentation
+
+Abhipsa Panigrahi
+Worked on Algorithm to calculate the coordinates of valid convolution outputs, and route these to the proper accumulator buffers
+Implementation of compute cycle calculation for multiplication and accumulation
+Validation of design: Performance analysis to study the trend shown by number of compute cycles, execution times and mapping efficiency with changes in IFMAP sizes, filter sizes and sparsities in both
+Ideation - Analytical calculation of compute cycles
+Contributed to Poster and Report development
+Presentation
+    
+Aakash Venkataraman
+Handle the convolution portion, give coordinates of valid convolution outputs, and handle the storing of these values in the accumulator matrix.
+Helped in the development and validating of the algorithm to handle sparse input matrix.    
+Worked on accumulator implementation for mapping inputs. 
+Literature review for VEGETA vs SCNN.
+Modifying how the cycles are computed in existing ScaleSIM code. 
+Presentation and Poster development
+
+
+
 
