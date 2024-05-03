@@ -5,7 +5,8 @@
 
 Our code integrates SCNN  a novel Sparse CNN (SCNN) accelerator architecture aimed at enhancing the performance and energy efficiency of Convolutional Neural Networks (CNNs) into SCALESim. SCALESim \cite{samajdar2018scalesim} serves as a Systolic Array simulator, aiding designers in fine-tuning accelerator parameters for executing diverse models and conducting Data Space Exploration (DSE). However, its capability to furnish optimal performance metrics for Sparse CNNs is limited. This limitation arises from the inclusion of compute cycles that process multiplications for operands with zero values. Eliminating such redundant computations can effectively reduce overall compute cycles. We investigate the impact of sparsity percentages in the input and filter matrices on both compute cycles and mapping efficiency.
 
-![SCNN overview] (https://github.com/scalesim-project/scale-sim-v2/blob/doc/anand/readme/documentation/resources/scnn_design_2.png "SCNN Overview")
+![scnn_design_2](https://github.com/ranjanib7/HML_Project/assets/36790410/fd58e4bf-c2bc-4b7e-bdc4-423e18265865)
+
 
 ## Getting started in 30 seconds
 
